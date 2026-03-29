@@ -115,6 +115,23 @@ export default function ProblemsPage() {
 
     const selectClass = "bg-white dark:bg-[#121622] border border-gray-200 dark:border-[#1e2332] text-gray-700 dark:text-gray-300 px-4 py-2.5 rounded-lg text-[13px] outline-none focus:border-[#3b82f6] appearance-none bg-no-repeat bg-[position:right_0.75rem_center] bg-[image:url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%239CA3AF%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')] pr-10 min-w-[140px] cursor-pointer hover:border-[#2a3a4e] transition-colors";
 
+    const handlePickOne = () => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            alert("First login then continue");
+            navigate("/login");
+            return;
+        }
+
+        const listToPickFrom = filteredProblems.length > 0 ? filteredProblems : problems;
+        if (listToPickFrom.length === 0) return;
+
+        const randomIndex = Math.floor(Math.random() * listToPickFrom.length);
+        const randomProblem = listToPickFrom[randomIndex];
+
+        navigate(`/solve/${randomProblem.id}`, { state: { problem: randomProblem } });
+    };
+
     return (
         <div className="p-8 max-w-7xl mx-auto pb-10">
             {/* HEADER */}
@@ -125,7 +142,10 @@ export default function ProblemsPage() {
                         Master your skills with curated coding challenges.
                     </p>
                 </div>
-                <button className="bg-[#3b82f6] px-5 py-2.5 rounded-lg text-sm font-medium text-white hover:bg-blue-500 transition-colors flex items-center gap-2.5 shadow-sm shadow-[#3b82f6]/20">
+                <button 
+                    onClick={handlePickOne}
+                    className="bg-[#3b82f6] px-5 py-2.5 rounded-lg text-sm font-medium text-white hover:bg-blue-500 transition-colors flex items-center gap-2.5 shadow-sm shadow-[#3b82f6]/20"
+                >
                     <Shuffle size={16} strokeWidth={2.5} /> Pick One
                 </button>
             </div>
