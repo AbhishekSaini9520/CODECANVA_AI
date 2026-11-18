@@ -1,0 +1,66 @@
+CodeCanvas AI - conservative unused-file audit
+Generated: 2026-11-18
+
+This list contains files that are not reached by the configured frontend or
+backend entry points and have no active application imports. It intentionally
+does not list node_modules, dist, .env files, Prisma migrations, or manually
+maintained SQL/seed files.
+
+HIGH CONFIDENCE: safe to remove from the current application
+
+frontend/src/routes/AppRoutes.jsx
+frontend/src/pages/ProblemWorkspace.jsx
+frontend/src/components/ProblemCard.jsx
+frontend/src/components/ProblemTable.jsx
+frontend/src/components/StatCard.jsx
+frontend/src/assets/react.svg
+frontend/src/assets/vite.svg
+frontend/src/assets/hero.png
+frontend/public/icons.svg
+
+Backend/src/server.js
+Backend/src/config/text.js
+Backend/src/services/leaderboardService.js
+Backend/src/utils/generateToken.js
+Backend/src/utils/parseDrawing.js
+
+Discussion feature currently not connected to the active application:
+frontend/src/pages/Discussion.jsx
+frontend/src/api/discussApi.js
+Backend/src/routes/discussRoute.js
+Backend/src/routes/notificationRoute.js
+Backend/src/controllers/discussionController.js
+Backend/src/controllers/notificationController.js
+Backend/src/services/notificationService.js
+  These files are not imported by frontend/src/App.jsx or mounted by
+  Backend/src/index.js. Remove them together only if discussion and
+  notification functionality is intentionally not required.
+
+fixRes.js
+fixRes2.js
+frontend/fixLeaderParse.cjs
+frontend/fixProblemWorkspace.cjs
+frontend/fixSolveProblem.cjs
+unnecessary_file.txt
+
+REVIEW BEFORE REMOVING
+
+Backend/src/script/importProblems.js
+  Manual database import utility. It is not loaded by Backend/src/index.js,
+  but may still be useful for future data imports.
+
+Backend/src/config/discuss_and_notification_schema.sql
+Backend/src/config/problem inserted.sql
+Backend/src/config/sheet insert query.sql
+Backend/src/config/sheet-problems mapping.sql
+  Manual SQL/schema files. They are not loaded automatically by the server,
+  but may be needed for database setup or recovery.
+
+Notes:
+- Backend/src/index.js and frontend/src/main.jsx are the configured runtime
+  entry points from the package scripts.
+- This is a static reference audit; dynamically loaded files or external
+  scripts cannot be proven safe solely from source references.
+- The frontend production build completed successfully before this report was
+  generated. Existing lint errors are unrelated source issues and do not
+  establish that whole files are unused.

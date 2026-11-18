@@ -337,10 +337,25 @@ exports.getPlatformStats = async (req, res) => {
     try {
         const userId = req.userId;
 
-        const { rows } = await pool.query(
+        let { rows } = await pool.query(
             "SELECT * FROM user_platform_stats WHERE user_id=$1",
             [userId]
         );
+
+        // If no stats exist, try syncing them
+        if (rows.length === 0) {
+            console.log("No stored stats found, syncing platforms...");
+            await exports.syncAllPlatforms(req, null);
+            
+            // Re-fetch after sync
+            const refresh = await pool.query(
+                "SELECT * FROM user_platform_stats WHERE user_id=$1",
+                [userId]
+            );
+            rows = refresh.rows;
+        }
+
+        console.log(rows);
 
         let leetcode = null;
         let codeforces = null;
@@ -373,6 +388,9 @@ exports.getPlatformStats = async (req, res) => {
                 };
             }
         });
+        console.log(leetcode);
+        console.log(codeforces);
+        console.log(codechef);
 
         res.json({
             leetcode,
@@ -420,16 +438,24 @@ exports.syncAllPlatforms = async (req, res) => {
         
         console.log("all sync attempts completed");
         
-        res.json({
-            leetcode,
-            codeforces,
-            codechef
-        })
+        if (res) {
+            res.json({
+                leetcode,
+                codeforces,
+                codechef
+            });
+        } else {
+            return { leetcode, codeforces, codechef };
+        }
 
     }
     catch (err) {
         console.error("Critical error in syncAllPlatforms:", err);
-        res.status(500).json({ error: err.message})
+        if (res) {
+            res.status(500).json({ error: err.message });
+        } else {
+            throw err;
+        }
     }
 
 }
