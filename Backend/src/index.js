@@ -27,12 +27,12 @@ const io = new Server(server, {
   cors: {
     origin: [
       // "http://localhost:5173",
-      "https://codecanvasai-dusky.vercel.app/"
-    ], // Adjust this in production
+      "https://codecanva-ai.vercel.app/"
+    ], 
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"]
   }
 });
-app.set("io", io); // Make io available in controllers if needed
+app.set("io", io); 
 setupSocket(io);
 
 app.use(cookieParser())
@@ -40,7 +40,7 @@ app.use(cookieParser())
 app.use(cors({
   origin: [
     // "http://localhost:5173",
-    "https://codecanvasai-dusky.vercel.app/"
+    "https://codecanva-ai.vercel.app/"
   ],
   credentials: true
 }))
