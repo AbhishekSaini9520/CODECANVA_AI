@@ -36,6 +36,17 @@ Backend/src/services/notificationService.js
   Backend/src/index.js. Remove them together only if discussion and
   notification functionality is intentionally not required.
 
+KEEP: ACTIVE SOCKET FILES
+
+Backend/src/socket.js
+frontend/src/hooks/useSocket.js
+frontend/src/components/Navbar.jsx
+frontend/package.json
+Backend/package.json
+  Socket.IO is initialized by Backend/src/index.js and the frontend Navbar
+  connects and registers the logged-in user. Removing these files or the
+  socket.io dependencies would change current runtime behavior.
+
 fixRes.js
 fixRes2.js
 frontend/fixLeaderParse.cjs
