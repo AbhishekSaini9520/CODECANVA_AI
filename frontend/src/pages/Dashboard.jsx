@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react"
 import { fetchDashboardStats, fetchSheets, fetchSheetProblems, fetchSolvedProblemIds } from "../api/progressApi"
 import { fetchUserHeatmap, fetchUserPlatformStats, syncUserPlatformStats } from "../api/platformStatsApi"
-import { CheckCircle2, Flame, ArrowUpCircle, Play, ArrowRight, BookOpen, Zap } from "lucide-react"
+import { CheckCircle2, Flame, ArrowUpCircle, ArrowRight, BookOpen, Zap, RefreshCw } from "lucide-react"
 import HeatMap from "../components/HeatMap"
 import { Link, useNavigate } from "react-router-dom"
 import RecentProblems from "../components/RecentProblem"
 import RecommendedProblems from "../components/Recommended"
 import { calculateStreak, calculateLongestStreak } from "../utils/streakCalculator"
+
+let initialHeatmapRequest = null
+const getHeatmapCacheKey = () => `dashboard_heatmap_${localStorage.getItem("token") || "guest"}`
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -23,24 +26,57 @@ function Dashboard() {
   const [sheets, setSheets] = useState([]);
   const [sheetProgress, setSheetProgress] = useState({});
   const [isLoadingHeatmap, setIsLoadingHeatmap] = useState(false);
+  const [isReloadingProfile, setIsReloadingProfile] = useState(false);
+  const [reloadMessage, setReloadMessage] = useState("");
   const [isHeatMapExpanded, setIsHeatMapExpanded] = useState(false);
 
   useEffect(() => {
+    const heatmapCacheKey = getHeatmapCacheKey();
+
+    const cacheHeatmap = (heatmap) => {
+      sessionStorage.setItem(heatmapCacheKey, JSON.stringify(heatmap));
+    };
+
+    const applyHeatmap = (heatmap) => {
+      setHeatmapData(heatmap);
+      const currentStreak = calculateStreak(heatmap);
+      const maxStreak = calculateLongestStreak(heatmap);
+      setStats(prev => ({ ...prev, currentStreak, maxStreak }));
+    };
+
+    const loadInitialHeatmap = async () => {
+      try {
+        const cachedHeatmap = sessionStorage.getItem(heatmapCacheKey);
+        if (cachedHeatmap) {
+          try {
+            applyHeatmap(JSON.parse(cachedHeatmap));
+            return;
+          } catch {
+            sessionStorage.removeItem(heatmapCacheKey);
+          }
+        }
+
+        if (!initialHeatmapRequest) {
+          initialHeatmapRequest = fetchUserHeatmap();
+        }
+
+        const heatmap = await initialHeatmapRequest;
+        cacheHeatmap(heatmap);
+        applyHeatmap(heatmap);
+        initialHeatmapRequest = null
+      } catch (error) {
+        initialHeatmapRequest = null
+        console.error("Failed to fetch initial heatmap", error);
+      }
+    };
+
     const fetchData = async () => {
       try {
         const data = await fetchDashboardStats();
 
         setStats(prev => ({ ...prev, ...data }));
-
-        const heatmap = await fetchUserHeatmap();
-        setHeatmapData(heatmap);
-
-        // Calculate both current and longest streak from heatmap data
-        const currentStreak = calculateStreak(heatmap);
-        const maxStreak = calculateLongestStreak(heatmap);
-        setStats(prev => ({ ...prev, currentStreak, maxStreak }));
       } catch (error) {
-        console.error("Failed to fetch dashboard stats or heatmap", error);
+        console.error("Failed to fetch dashboard stats", error);
       }
     };
 
@@ -88,6 +124,7 @@ function Dashboard() {
     // Check if user is logged in before fetching
     if (localStorage.getItem('token')) {
       fetchData();
+      loadInitialHeatmap();
       loadPlatformStats();
       loadSheets();
     } else {
@@ -95,27 +132,45 @@ function Dashboard() {
     }
   }, [navigate]);
 
-  // Refresh heatmap data and recalculate streak
-  const handleRefreshHeatmap = async () => {
-    setIsLoadingHeatmap(true);
+  // Reload externally scraped platform data only when the user requests it.
+  const handleReloadProfile = async () => {
+    setIsReloadingProfile(true);
+    setReloadMessage("");
     try {
-      // First sync platforms
       await syncUserPlatformStats();
       
-      // Then fetch the latest heatmap data
       const heatmap = await fetchUserHeatmap();
       setHeatmapData(heatmap);
+      sessionStorage.setItem(getHeatmapCacheKey(), JSON.stringify(heatmap));
       
-      // And the latest platform stats
       const data = await fetchUserPlatformStats();
       const totalQuestions = (data.leetcode?.totalSolved || 0) + (data.codeforces?.solved || 0) + (data.codechef?.totalSolved || 0);
 
-      // Recalculate both current and longest streak with new data
       const currentStreak = calculateStreak(heatmap);
       const maxStreak = calculateLongestStreak(heatmap);
       setStats(prev => ({ ...prev, currentStreak, maxStreak, totalQuestions }));
+      setStats(prev => ({ ...prev, ...data }));
+      setReloadMessage("Profile data updated");
     } catch (error) {
-      console.error("Failed to refresh heatmap data", error);
+      console.error("Failed to reload profile data", error);
+      setReloadMessage(error.response?.data?.error || "Failed to reload profile data");
+    } finally {
+      setIsReloadingProfile(false);
+    }
+  };
+
+  const handleReloadHeatmap = async () => {
+    setIsLoadingHeatmap(true);
+    try {
+      const heatmap = await fetchUserHeatmap();
+      setHeatmapData(heatmap);
+      sessionStorage.setItem(getHeatmapCacheKey(), JSON.stringify(heatmap));
+
+      const currentStreak = calculateStreak(heatmap);
+      const maxStreak = calculateLongestStreak(heatmap);
+      setStats(prev => ({ ...prev, currentStreak, maxStreak }));
+    } catch (error) {
+      console.error("Failed to reload heatmap", error);
     } finally {
       setIsLoadingHeatmap(false);
     }
@@ -123,6 +178,21 @@ function Dashboard() {
 
   return (
     <div className="flex flex-col gap-8 max-w-7xl mx-auto pb-10 pt-4">
+
+      <div className="flex justify-end items-center gap-3">
+        {reloadMessage && (
+          <span className="text-sm text-gray-500 dark:text-gray-400">{reloadMessage}</span>
+        )}
+        <button
+          type="button"
+          onClick={handleReloadProfile}
+          disabled={isReloadingProfile}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#625df5] text-white text-sm font-semibold shadow-sm hover:bg-[#524de3] disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+        >
+          <RefreshCw size={16} className={isReloadingProfile ? "animate-spin" : ""} />
+          {isReloadingProfile ? "Reloading..." : "Reload Profile"}
+        </button>
+      </div>
 
       {/* Top Section */}
       <div className="flex xl:flex-row flex-col gap-8">
@@ -248,7 +318,7 @@ function Dashboard() {
         <div className={`${isHeatMapExpanded ? 'w-auto' : 'flex-[2]'} overflow-hidden flex flex-col transition-all duration-300`}>
           <HeatMap
             heatmap={heatmapData}
-            onRefresh={handleRefreshHeatmap}
+            onRefresh={handleReloadHeatmap}
             isLoading={isLoadingHeatmap}
             isExpanded={isHeatMapExpanded}
             onToggleExpand={() => setIsHeatMapExpanded(!isHeatMapExpanded)}

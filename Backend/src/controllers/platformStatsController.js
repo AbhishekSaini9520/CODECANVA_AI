@@ -135,7 +135,7 @@ exports.syncLeetcode = async (req, res) => {
         //     rating
         // })
 
-        return {
+        const result = {
             platform: "leetcode",
             username,
             totalSolved,
@@ -144,6 +144,7 @@ exports.syncLeetcode = async (req, res) => {
             hardSolved,
             rating
         }
+        return res ? res.json(result) : result
 
     }
     catch (err) {
@@ -228,11 +229,12 @@ exports.syncCodeforces = async (req, res) => {
         //     rating: userInfo.rating
         // })
 
-        return {
+        const result = {
             platform: "codeforces",
             solved: solvedProblems.size,
             rating: userInfo.rating
         }
+        return res ? res.json(result) : result
 
     }
     catch (err) {
@@ -314,12 +316,13 @@ exports.syncCodechef = async (req, res) => {
         //     stars,
         //     totalSolved
         // })
-        return {
+        const result = {
             platform: "codechef",
             rating,
             stars,
             totalSolved
         }
+        return res ? res.json(result) : result
 
     }
     catch (err) {

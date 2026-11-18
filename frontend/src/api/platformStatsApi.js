@@ -11,6 +11,6 @@ export const fetchUserPlatformStats = async () => {
 };
 
 export const syncUserPlatformStats = async () => {
-  const response = await API.post('/stats/sync-all');
+  const response = await API.post('/stats/reload-profile');
   return response.data;
 };

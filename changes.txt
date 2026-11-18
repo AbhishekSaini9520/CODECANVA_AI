@@ -1,0 +1,27 @@
+CodeCanvas AI - Profile Reload Changes
+Date: 2026-11-18
+
+Backend
+- Added POST /api/stats/reload-profile in Backend/src/routes/platformStats.js.
+- Reused the existing syncAllPlatforms implementation so LeetCode, Codeforces, and CodeChef are scraped/refreshed through the same logic.
+- Updated platform sync functions to return JSON results when called directly and preserve internal object results when called by sync-all.
+- Existing POST /api/stats/sync-all remains available for compatibility.
+
+Frontend
+- Added a Reload Profile button to the Dashboard.
+- Reload Profile is now the dashboard action that refreshes stored platform stats and heatmap data.
+- Updated platformStatsApi.js so syncUserPlatformStats calls POST /api/stats/reload-profile.
+- Updated the heatmap refresh button to call the same reload-profile flow.
+- Added loading, success, and error feedback while profile data is reloading.
+- Dashboard totals, platform ratings, solved counts, heatmap, and streak values are updated after a successful reload.
+
+Behavior
+- Platform data is not periodically scraped or changed by the dashboard load.
+- Stored database values remain constant until Reload Profile or the heatmap reload button is pressed.
+- On reload, existing page scrapers/API integrations are reused and the updated values are saved with upsert logic.
+
+Heatmap reload behavior
+- The first Dashboard visit performs one automatic heatmap fetch and caches the result in sessionStorage.
+- Navigating to another page and back to Dashboard uses the cached heatmap instead of scraping again.
+- The heatmap reload icon calls only the heatmap endpoint and updates the heatmap, streak, and cached data.
+- Reload Profile remains separate and refreshes platform profile statistics; it does not share the heatmap button's fetch-only behavior.

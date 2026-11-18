@@ -59,7 +59,7 @@ const HeatMap = ({ heatmap, onRefresh, isLoading, isExpanded, onToggleExpand }) 
                         onClick={onRefresh}
                         disabled={isLoading}
                         className="p-2.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed group"
-                        title="Refresh heatmap data"
+                        title="Reload profile and heatmap data"
                     >
                         <RefreshCw
                             size={18}
