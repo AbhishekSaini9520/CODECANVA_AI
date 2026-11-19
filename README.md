@@ -1,152 +1,118 @@
-﻿# CodeCanvas AI
+# CodeCanvas AI
 
-CodeCanvas AI is a comprehensive **DSA learning and problem-solving platform** that aggregates popular coding sheets (Blind 75, Striver SDE Sheet, etc.) into a unified system with an **integrated code compiler, AI-assisted learning, real-time whiteboarding, and advanced progress tracking**.
+CodeCanvas AI is a DSA practice platform for browsing curated problem sheets, tracking solved problems, running code, reviewing platform statistics, and getting AI-assisted help.
 
-The platform is designed to eliminate fragmented learning by offering everything a student needs in a single environment: from tracking roadmaps to writing and testing code, understanding concepts via an interactive AI tutor, and visually mapping solutions.
+## What is included
 
----
+- Problem and sheet browsing with duplicate-free sheet mappings.
+- Authenticated progress tracking and solved-problem statistics.
+- Monaco code editor connected to Judge0 through the backend.
+- Excalidraw workspace with AI image analysis and chat.
+- Google OAuth and JWT-based authentication.
+- Profile-image uploads through Cloudinary.
+- LeetCode, Codeforces, and CodeChef statistics synchronization.
+- Activity heatmap and leaderboard views.
+- Socket.IO connection support for user registration and connection updates.
 
-# Problem Statement
+## Project structure
 
-Many computer science students struggle with **DSA preparation due to scattered resources**.
+```text
+CODECANVAS-AI/
+├── frontend/   React + Vite application
+└── Backend/    Express + Socket.IO API
+```
 
-Students typically jump between:
-* Striver SDE Sheet, Blind 75, Neetcode 150
-* Various integrated coding environments (LeetCode, GFG)
-* Separate drawing tools for conceptualizing algorithms.
-* Standalone chatbots for hints and explanations.
+## Tech stack
 
-CodeCanvas AI unifies this journey by providing:
-* A **centralized sheet aggregator** and **duplicate problem mapping**.
-* An **integrated Monaco-based Code Compiler**.
-* An **interactive Whiteboard** for flow-charting solutions.
-* An **AI-powered Learning Assistant** for guided hints, not just plain answers.
-* **Gamified Progress Tracking, Leaderboards, and Heatmaps**.
+### Frontend
 
----
+- React 19 and Vite
+- React Router
+- Axios
+- Monaco Editor
+- Excalidraw
+- Tailwind CSS
+- Socket.IO client
+- Google OAuth
+- React Markdown with KaTeX support
 
-# Key Features
+### Backend
 
-## 📚 Integrated Sheet Aggregator (SheetScope)
-Combines multiple popular problem sheets into a single platform without duplicate problems. Track your progress across Blind 75, Striver's Sheet, Babbar 450, and custom lists seamlessly.
+- Node.js and Express
+- Socket.IO
+- PostgreSQL accessed through `pg`
+- JWT and bcrypt authentication
+- Google OAuth verification
+- Google Gemini AI
+- Judge0 code execution through RapidAPI
+- Cloudinary profile-image storage
+- Multer in-memory uploads
 
-## 💻 Built-in Code Compiler & Workspace
-Practice coding directly on the platform in a fully-featured code editor (Monaco Editor). Compile, run, and test your code without leaving the browser. 
+## Requirements
 
-## 🤖 AI Learning Assistant & Code Tutor
-Powered by Google Generative AI (Gemini), the AI tutor guides you through hints progressively:
-1. **Observation Hint**: Identifying patterns.
-2. **Strategy Hint**: Approach design.
-3. **Pseudocode / Code Review**: Analyzing your current editor context.
+- Node.js 18 or newer
+- PostgreSQL
+- Credentials for the external services used by the features you enable: Google OAuth, Gemini, Judge0 RapidAPI, and Cloudinary.
 
-## 🎨 Real-time Whiteboard & Diagrammatic Reasoning
-Built-in TLDraw whiteboard allows users to mock up recursive trees, graphs, and system architectures right next to their code. Use AI diagram parsing (coming soon/in-beta) and review your structural diagrams!
+## Run locally
 
-## 📈 Analytics, Gamification & Heatmaps
-* **Activity Heatmap**: Visualize daily coding streaks (similar to GitHub).
-* **Global Leaderboards**: Check podium rankings and compete with peers.
-* **Platform Stats**: Track language usage, accuracy, and difficulty progression via interactive charts.
+Install dependencies and start the backend:
 
-## 💬 Community Discussions & Real-time Notifications
-* **Live WebSockets**: Powered by Socket.io for instant notifications and real-time updates.
-* **Discussion Forums**: Ask questions, share approaches, and discuss optimizations for specific problems.
+```bash
+cd Backend
+npm install
+npm run dev
+```
 
----
+The backend listens on port `5000` by default. Set `PORT` to use another port.
 
-# Tech Stack
+Configure the PostgreSQL connection in `Backend/src/config/db.js` before starting the API. Keep service secrets in environment variables rather than source control. The backend reads these variables:
 
-## Frontend
-* **Core**: React 19 (Vite) & React Router v7
-* **Editor & Diagrams**: Monaco Editor (@monaco-editor/react), TLDraw
-* **Styling & Visualization**: TailwindCSS v4, Recharts, Lucide React
-* **State & Networking**: Axios, Socket.io-Client, React Google OAuth
+```env
+PORT=5000
+JWT_SECRET=your_jwt_secret
+GOOGLE_CLIENT_ID=your_google_client_id
+GEMINI_API_KEY=your_gemini_api_key
+JUDGE0_KEY=your_rapidapi_key
+CLOUD_NAME=your_cloudinary_name
+CLOUD_API_KEY=your_cloudinary_key
+CLOUD_API_SECRET=your_cloudinary_secret
+```
 
-## Backend
-* **Serverless / API**: Node.js & Express.js
-* **Database**: PostgreSQL with **Prisma ORM**
-* **AI Integration**: Google Generative AI / GenAI (Gemini SDK)
-* **Real-time Engine**: Socket.io
-* **Security & Auth**: JWT, Bcrypt, Google Auth Library
-* **Media & Uploads**: Cloudinary, Multer
+In another terminal, install dependencies and start the frontend:
 
----
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-# System Architecture
+The frontend currently uses `http://localhost:5000/api` as its API base URL. Set `VITE_GOOGLE_CLIENT_ID` in `frontend/.env` for Google login:
 
-`	ext
-Frontend (React + Vite + Tailwind 4)
-│
-├── Workspace View (Monaco Editor & TLDraw Whiteboard)
-│
-├── WebSocket Hub (Real-time events, Leaderboard, Notifications)
-│
-└── REST API (Axios instance)
-      ▼
-Backend (Node.js + Express + Prisma)
-│
-├── External Services (Google GenAI, Cloudinary)
-│
-└── PostgreSQL Database
-`
+```env
+VITE_GOOGLE_CLIENT_ID=your_google_client_id
+```
 
----
+## Available API groups
 
-# Database Schema Overview
+The backend mounts these route groups under `/api`:
 
-The database is designed around **canonical problem mapping** and a rich learning ecosystem.
+- `/auth` - registration, login, Google login, current user, and profile updates.
+- `/problems` - problem listing, details, recommended and recent problems, and problem creation.
+- `/sheets` - sheet listing, sheet problems, progress, and sheet creation.
+- `/progress` - solved problems, progress updates, statistics, and leaderboard.
+- `/submissions` - submission creation and history.
+- `/stats` - platform statistics, synchronization, stored stats, and heatmap data.
+- `/run` - code execution.
+- `/ai` - image analysis and continued AI chat.
+- `/user` - authenticated profile-image upload.
 
-Main entities:
-* **Users**: General profiles, streaks, and gamification tracking.
-* **Problems & Sheets**: Master directory of canonical problems mapped uniquely to curated sheets.
-* **Progress**: Granular tracking across states (Not Started, Attempted, Solved).
-* **Submissions & Runcodes**: Stores user code executions.
-* **Discussions & Notifications**: Relational systems for community Q&A and alerts.
+## Validation
 
----
+```bash
+cd frontend
+npm run lint
+npm run build
+```
 
-# Getting Started
-
-## Prerequisites
-* Node.js (v18+)
-* PostgreSQL
-* Redis (if strictly using BullMQ/rate limits later)
-
-## Installation
-
-1. Clone the repository:
-   `ash
-   git clone https://github.com/VivekSaini2005/codecanvas-ai.git
-   cd codecanvas-ai
-   `
-
-2. Install backend dependencies & start server:
-   `ash
-   cd Backend
-   npm install
-   # Set up .env with DATABASE_URL, GEMINI_API_KEY, JWT_SECRET, CLOUDINARY details
-   npx prisma generate
-   npx prisma db push
-   node src/index.js
-   `
-
-3. Install frontend dependencies & run locally:
-   `ash
-   cd ../frontend
-   npm install
-   # Set up .env with VITE_API_URL, Google Client ID, etc.
-   npm run dev
-   `
-
----
-
-# Long-Term Vision
-
-CodeCanvas AI aims to become the **ultimate operating system for technical growth**, providing a structured environment where students can build algorithmic thinking, map their logic virtually, and prepare meticulously for software engineering interviews.
-
----
-
-# Author
-
-**Vivek Saini**
-Full Stack Developer
-[GitHub Profile](https://github.com/VivekSaini2005)
+The backend package does not currently define an automated test suite.

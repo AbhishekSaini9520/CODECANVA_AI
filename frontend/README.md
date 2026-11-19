@@ -1,16 +1,66 @@
-# React + Vite
+# CodeCanvas AI Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The frontend is a React 19 single-page application built with Vite. It provides the user interface for browsing DSA problems and sheets, tracking progress, running code, viewing platform statistics, and interacting with the AI assistant.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Public home, problem, sheet, login, registration, and leaderboard pages.
+- Protected profile page with profile-image upload.
+- Dashboard with solved-problem statistics, platform statistics, and activity heatmap.
+- Problem and sheet browsing with solved-state tracking.
+- Monaco-based code editor connected to the backend compiler endpoint.
+- Excalidraw whiteboard with image analysis and AI chat actions.
+- Google OAuth login.
+- Socket.IO connection for user registration and real-time connection handling.
+- Light and dark themes.
 
-## React Compiler
+## Routes
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+| Route | Purpose |
+| --- | --- |
+| `/` | Home page |
+| `/dashboard` | User dashboard |
+| `/sheets` | Available sheets |
+| `/sheet/:id` | Problems in a sheet |
+| `/problems` | Problem list |
+| `/problem/:slug` | Problem details |
+| `/solve/:problemId` | Problem workspace |
+| `/leaderboard` | Leaderboard |
+| `/login` | Login |
+| `/register` | Registration |
+| `/profile` | Authenticated profile |
 
-## Expanding the ESLint configuration
+## Requirements
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- Node.js 18 or newer
+- The backend running locally on `http://localhost:5000`, unless the API URL in `src/api/axiosInstance.js` is changed.
+- A Google OAuth client ID for Google login.
+
+## Setup
+
+```bash
+cd frontend
+npm install
+```
+
+Create `frontend/.env` and set the Google OAuth client ID:
+
+```env
+VITE_GOOGLE_CLIENT_ID=your_google_client_id
+```
+
+Start the development server:
+
+```bash
+npm run dev
+```
+
+The other available scripts are:
+
+```bash
+npm run build
+npm run preview
+npm run lint
+```
+
+Authentication tokens are read from `localStorage` and sent as Bearer tokens by the shared Axios instance.
